@@ -1,0 +1,35 @@
+{
+    "is_uploaded": true,
+    "show_notification": true,
+    "text": "Error.. Detected face size must be atleast 120x120 size..",
+    "title": "Error",
+    "type": "error"
+},{
+    "is_uploaded": true,
+    "show_notification": true,
+    "text": "Error.. Detected face size must be atleast 120x120 size..",
+    "title": "Error",
+    "type": "error"
+},{
+    "is_uploaded": true,
+    "show_notification": true,
+    "text": "Error.. Detected face size must be atleast 120x120 size..",
+    "title": "Error",
+    "type": "error"
+},{
+    "confidence_age": 0.171361,
+    "confidence_gender": 0.991222,
+    "label": "spoof",
+    "prediction_age": 32,
+    "prediction_gender": "male",
+    "score": 13.5984,
+    "show_notification": false,
+    "title": "Success",
+    "type": "success"
+},{
+    "is_uploaded": true,
+    "show_notification": true,
+    "text": "Error.. Detected face size must be atleast 120x120 size..",
+    "title": "Error",
+    "type": "error"
+},
