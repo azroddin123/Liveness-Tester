@@ -60,7 +60,11 @@ def main():
     )
     parser.add_argument(
         "--api_url", type=str, default="http://164.52.218.61/upload.php", 
-        help="API Url to check liveness"
+        help="""API Url to check liveness: Example
+        1) http://164.52.218.61/upload.php
+        2) https://live.accurascan.com/upload.php
+        3) http://127.0.0.1/upload.php -- useful if you have cpp api sdk on local
+        """
     )
     parser.add_argument(
         "-w", "--max_workers", type=int, required=False, help="", default=1
