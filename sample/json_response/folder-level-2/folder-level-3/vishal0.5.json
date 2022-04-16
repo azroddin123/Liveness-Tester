@@ -1,0 +1,11 @@
+{
+    "confidence_age": 1,
+    "confidence_gender": 1,
+    "label": "spoof",
+    "prediction_age": 33,
+    "prediction_gender": "male",
+    "score": null,
+    "show_notification": false,
+    "title": "Success",
+    "type": "success"
+}
