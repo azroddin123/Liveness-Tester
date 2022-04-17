@@ -9,6 +9,9 @@ from pathlib import Path
 import requests
 import httpx ## pip install httpx
 
+import aiohttp
+import asyncio
+
 from psutil import cpu_count
 from tqdm.auto import tqdm
 from tqdm.contrib.concurrent import process_map, thread_map  # requires tqdm>=4.42.0
@@ -58,6 +61,27 @@ def call_Api(image_rel_filepath, dir_path, api_url, json_result_base_dir, verbos
         print(response_text)
     
     return response_text
+
+async def do_post(session, api_url, image_rel_filepath, dir_path):
+    image_abs_path = os.path.join(dir_path, image_rel_filepath) ## abasolute path
+    data = aiohttp.FormData()
+    data.add_field('photo',open(image_abs_path, 'rb'), content_type='image/png')
+    async with session.post(api_url, data=data) as response:
+          response_data = await response.text()
+          print(response_data)
+
+async def make_async_request(api_url,lst_image_files, dir_path):
+    async with aiohttp.ClientSession() as session:
+        post_tasks = []
+        # prepare the coroutines that post
+        for image_rel_filepath in lst_image_files:
+            post_tasks.append(
+                do_post(
+                    session, api_url, image_rel_filepath, dir_path
+                )
+            )
+        # now execute them all at once
+        await asyncio.gather(*post_tasks)
 
 def str2bool(v):
     import argparse
@@ -124,22 +148,30 @@ def main():
         ## Commenting for now -- as request module is not thread safe
         ## getting null result many times
 
-        ## TODO : Add alternative modules to make parallel async calls
-        worker = call_Api  # function to map
-        kwargs = {
-            'dir_path': dir_path,
-            'api_url': args.api_url,
-            'json_result_base_dir': json_result_base_dir,
-            'verbose': verbose,
-        }
-        jobs = lst_image_files  # file_rel_paths
+        # ## TODO : Add alternative modules to make parallel async calls
+        # worker = call_Api  # function to map
+        # kwargs = {
+        #     'dir_path': dir_path,
+        #     'api_url': args.api_url,
+        #     'json_result_base_dir': json_result_base_dir,
+        #     'verbose': verbose,
+        # }
+        # jobs = lst_image_files  # file_rel_paths
 
-        result = thread_map(
-            partial(worker, **kwargs), jobs, 
-            max_workers=args.max_workers
+        # result = thread_map(
+        #     partial(worker, **kwargs), jobs, 
+        #     max_workers=args.max_workers
+        # )
+        # return result
+        # print(f"Multithreading not finalized yet...")
+
+        asyncio.run(
+            make_async_request(
+                args.api_url, lst_image_files, dir_path
+            )
         )
-        return result
-        print(f"Multithreading not finalized yet...")
+
+
         pass
         
 if __name__ == "__main__":
