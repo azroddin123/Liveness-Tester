@@ -1,13 +1,13 @@
 from hashlib import new
 from xmlrpc.client import boolean
-from matplotlib.font_manager import json_dump
-import requests
 import json
 from nb_utils.file_dir_handling import list_files ## pip install nb_utils
 import argparse 
 import glob
 import os 
 from pathlib import Path
+import requests
+import httpx ## pip install httpx
 
 from psutil import cpu_count
 from tqdm.auto import tqdm
@@ -26,7 +26,9 @@ def call_Api(image_rel_filepath, dir_path, api_url, json_result_base_dir, verbos
       ('photo',(os.path.basename(image_abs_path),open(image_abs_path,'rb'),'image/png'))
     ]
     headers = {}
-    response = requests.request("POST", api_url, headers=headers, data=payload, files=files, verify=False)
+    # response = requests.request("POST", api_url, headers=headers, data=payload, files=files, verify=False)
+
+    response = httpx.post(api_url, headers=headers, data=payload, files=files, verify=False)
 
     with open("result.json",'w') as f :
         f.write(json.dumps(response.json(), sort_keys=True, indent=4))
@@ -123,20 +125,20 @@ def main():
         ## getting null result many times
 
         ## TODO : Add alternative modules to make parallel async calls
-        # worker = call_Api  # function to map
-        # kwargs = {
-        #     'dir_path': dir_path,
-        #     'api_url': args.api_url,
-        #     'json_result_base_dir': json_result_base_dir,
-        #     'verbose': verbose,
-        # }
-        # jobs = lst_image_files  # file_rel_paths
+        worker = call_Api  # function to map
+        kwargs = {
+            'dir_path': dir_path,
+            'api_url': args.api_url,
+            'json_result_base_dir': json_result_base_dir,
+            'verbose': verbose,
+        }
+        jobs = lst_image_files  # file_rel_paths
 
-        # result = thread_map(
-        #     partial(worker, **kwargs), jobs, 
-        #     max_workers=args.max_workers
-        # )
-        # return result
+        result = thread_map(
+            partial(worker, **kwargs), jobs, 
+            max_workers=args.max_workers
+        )
+        return result
         print(f"Multithreading not finalized yet...")
         pass
         
