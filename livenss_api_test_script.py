@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import requests
 import httpx ## pip install httpx
+import shutil
 
 from psutil import cpu_count
 from tqdm.auto import tqdm
@@ -23,17 +24,23 @@ def call_Api(image_rel_filepath, dir_path, api_url, json_result_base_dir, verbos
     payload={}
     files=[
         # ('photo',('file',open('/home/azhar/liveness_test/11.png','rb'),'image/png')),
-      ('photo',(os.path.basename(image_abs_path),open(image_abs_path,'rb'),'image/png'))
+      ('photo',(os.path.basename(image_abs_path),open(image_abs_path,'rb'),'image/jpg'))
     ]
     headers = {}
-    # response = requests.request("POST", api_url, headers=headers, data=payload, files=files, verify=False)
+    response = requests.request("POST", api_url, headers=headers, data=payload, files=files, verify=False)
 
-    response = httpx.post(api_url, headers=headers, data=payload, files=files, verify=False)
+    # response = httpx.post(api_url, headers=headers, data=payload, files=files, verify=False)
+
+    response_text = json.loads(response.text)
+
+    if response_text["type"] == "error" and response_text["text"] == "Error connecting liveness sdk..":
+        err_dest_pth = os.path.join("/tmp", os.path.basename(image_abs_path))
+        shutil.copy2(image_abs_path, err_dest_pth)
+        import pdb; pdb.set_trace()
 
     with open("result.json",'w') as f :
         f.write(json.dumps(response.json(), sort_keys=True, indent=4))
         
-    response_text = json.loads(response.text)
 
     ###
     json_out_file_relpath = Path(image_rel_filepath).with_suffix(".json")
